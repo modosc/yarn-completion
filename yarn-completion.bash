@@ -1,7 +1,7 @@
 # shellcheck shell=bash disable=2207
 # vim: set fdm=syntax fdl=0:
 #
-# Version: 0.17.0
+# Version: 0.18.0
 # Yarn Version: 1.22.11
 #
 # bash completion for Yarn (https://github.com/yarnpkg/yarn)
@@ -773,6 +773,26 @@ _yarn_run() {
 	return 1
 }
 
+_yarn_bin() {
+	((depth++))
+	declare cmd
+	subcommands=(
+		$(__yarn_get_package_fields bin)
+	)
+	__yarn_get_command
+	if [[ $cmd == bin ]]; then
+		case "$cur" in
+			-*) ;;
+			*)
+				COMPREPLY=($(compgen -W "${subcommands[*]}" -- "$cur"))
+				return 0
+				;;
+		esac
+	fi
+	return 1
+}
+
+
 _yarn_tag() {
 	((depth++))
 	declare cmd
@@ -981,6 +1001,10 @@ _yarn_workspaces() {
 			__yarn_run
 			return 0
 			;;
+		bin)
+			__yarn_bin
+			return 0
+			;;
 	esac
 	return 1
 }
@@ -1071,6 +1095,7 @@ _yarn() {
 		workspace
 		workspaces
 		$(__yarn_get_package_fields scripts)
+		$(__yarn_get_package_fields bin)
 	)
 	declare -a subcommands=()
 
